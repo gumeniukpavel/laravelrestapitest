@@ -1,9 +1,13 @@
 Окружение: PHP 7.2 и выше, Lavarel
 Задание: 
 Создать API на базе чистого проекта Lavarel. API будет представлять из себя 3 запроса:
+
 GET: /api/books/list - Получение списка книг
+
 GET: /api/book/{bookId} - Получение данных книги по ID
+
 POST: /api/book/add - Добавление книги
+
 Дополнительные требования:
 1. Создать миграции для таблиц books и categories:
     books: id, name, category_id, created_at, updated_at, deleted_at
