@@ -4,6 +4,7 @@ namespace Tests\Feature\API;
 
 use App\Book;
 use App\Category;
+use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Artisan;
@@ -15,6 +16,12 @@ class BookTest extends TestCase
 
     public function testBookIsCreatedCorrectly()
     {
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
         factory(Category::class)->create([
             'name' => 'First Category',
         ]);
@@ -24,7 +31,7 @@ class BookTest extends TestCase
             'category_id' => 1
         ];
 
-        $this->json('POST', 'api/book/add', $payload)
+        $this->json('POST', 'api/book/add', $payload, $headers)
             ->assertStatus(200)
             ->assertJson([
                 'success' => true
@@ -38,12 +45,18 @@ class BookTest extends TestCase
 
     public function testBookIsCreatedFailedDontCreatedCategory()
     {
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
         $payload = [
             'name' => 'First Book',
             'category_id' => 1
         ];
 
-        $this->json('POST', 'api/book/add', $payload)
+        $this->json('POST', 'api/book/add', $payload, $headers)
             ->assertStatus(500)
             ->assertJson([
                 'success' => false
@@ -55,41 +68,24 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookIsCreatedFailedNotValidatedName()
+    public function testValidatedNameAndCategoryId()
     {
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
         factory(Category::class)->create([
             'name' => 'First Category',
         ]);
 
         $payload = [
             'name' => true,
-            'category_id' => 1
-        ];
-
-        $this->json('POST', 'api/book/add', $payload)
-            ->assertStatus(400)
-            ->assertJson([
-                'success' => false
-            ])
-            ->assertJsonStructure([
-                'success',
-                'data',
-                'message'
-            ]);
-    }
-
-    public function testBookIsCreatedFailedNotValidatedCategoryId()
-    {
-        factory(Category::class)->create([
-            'name' => 'First Category',
-        ]);
-
-        $payload = [
-            'name' => 'First Book',
             'category_id' => 'test'
         ];
 
-        $this->json('POST', 'api/book/add', $payload)
+        $this->json('POST', 'api/book/add', $payload, $headers)
             ->assertStatus(400)
             ->assertJson([
                 'success' => false
@@ -101,39 +97,19 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookIsCreatedFailedMissingCategoryId()
+    public function testRequiresNameAndCategoryId()
     {
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
         factory(Category::class)->create([
             'name' => 'First Category',
         ]);
 
-        $payload = [
-            'name' => 'First Book',
-        ];
-
-        $this->json('POST', 'api/book/add', $payload)
-            ->assertStatus(400)
-            ->assertJson([
-                'success' => false
-            ])
-            ->assertJsonStructure([
-                'success',
-                'data',
-                'message'
-            ]);
-    }
-
-    public function testBookIsCreatedFailedMissingName()
-    {
-        factory(Category::class)->create([
-            'name' => 'First Category',
-        ]);
-
-        $payload = [
-            'category_id' => 1,
-        ];
-
-        $this->json('POST', 'api/book/add', $payload)
+        $this->json('POST', 'api/book/add', [], $headers)
             ->assertStatus(400)
             ->assertJson([
                 'success' => false
@@ -147,6 +123,12 @@ class BookTest extends TestCase
 
     public function testBookIsShowedCorrectly()
     {
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
         factory(Category::class)->create([
             'name' => 'First Category',
         ]);
@@ -156,7 +138,7 @@ class BookTest extends TestCase
             'category_id' => 1
         ]);
 
-        $response = $this->json('GET', 'api/book/1', [])
+        $response = $this->json('GET', 'api/book/1', [], $headers)
             ->assertStatus(200)
             ->assertJson([
                 'success' => true
@@ -170,7 +152,13 @@ class BookTest extends TestCase
 
     public function testBookIsShowedFailedNotFound()
     {
-        $response = $this->json('GET', 'api/book/1', [])
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
+        $response = $this->json('GET', 'api/book/1', [], $headers)
             ->assertStatus(404)
             ->assertJson([
                 'success' => false
@@ -183,6 +171,12 @@ class BookTest extends TestCase
 
     public function testBooksAreListedCorrectly()
     {
+        $user = factory(User::class)->create(['email' => 'test@test.test']);
+
+        $token = $user->generateToken();
+
+        $headers = ['Authorization' => "Bearer $token"];
+
         factory(Category::class)->create([
             'name' => 'First Category',
         ]);
@@ -197,7 +191,7 @@ class BookTest extends TestCase
             'category_id' => 1
         ]);
 
-        $response = $this->json('GET', 'api/books/list', [])
+        $response = $this->json('GET', 'api/books/list', [], $headers)
             ->assertStatus(200)
             ->assertJson([
                 'success' => true
