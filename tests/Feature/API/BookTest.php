@@ -13,7 +13,7 @@ class BookTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testBookAreCreatedCorrectly()
+    public function testBookIsCreatedCorrectly()
     {
         factory(Category::class)->create([
             'name' => 'First Category',
@@ -36,7 +36,7 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookAreCreatedFailedDontCreatedCategory()
+    public function testBookIsCreatedFailedDontCreatedCategory()
     {
         $payload = [
             'name' => 'First Book',
@@ -55,7 +55,7 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookAreCreatedFailedNotValidatedName()
+    public function testBookIsCreatedFailedNotValidatedName()
     {
         factory(Category::class)->create([
             'name' => 'First Category',
@@ -78,7 +78,7 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookAreCreatedFailedNotValidatedCategoryId()
+    public function testBookIsCreatedFailedNotValidatedCategoryId()
     {
         factory(Category::class)->create([
             'name' => 'First Category',
@@ -101,7 +101,7 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookAreCreatedFailedMissingCategoryId()
+    public function testBookIsCreatedFailedMissingCategoryId()
     {
         factory(Category::class)->create([
             'name' => 'First Category',
@@ -123,7 +123,7 @@ class BookTest extends TestCase
             ]);
     }
 
-    public function testBookAreCreatedFailedMissingName()
+    public function testBookIsCreatedFailedMissingName()
     {
         factory(Category::class)->create([
             'name' => 'First Category',
@@ -141,6 +141,42 @@ class BookTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'data',
+                'message'
+            ]);
+    }
+
+    public function testBookIsShowedCorrectly()
+    {
+        factory(Category::class)->create([
+            'name' => 'First Category',
+        ]);
+
+        factory(Book::class)->create([
+            'name' => 'First Book',
+            'category_id' => 1
+        ]);
+
+        $response = $this->json('GET', 'api/book/1', [])
+            ->assertStatus(200)
+            ->assertJson([
+                'success' => true
+            ])
+            ->assertJsonStructure([
+                'success',
+                'data',
+                'message'
+            ]);
+    }
+
+    public function testBookIsShowedFailedNotFound()
+    {
+        $response = $this->json('GET', 'api/book/1', [])
+            ->assertStatus(404)
+            ->assertJson([
+                'success' => false
+            ])
+            ->assertJsonStructure([
+                'success',
                 'message'
             ]);
     }
@@ -169,42 +205,6 @@ class BookTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'data',
-                'message'
-            ]);
-    }
-
-    public function testBookAreShowedCorrectly()
-    {
-        factory(Category::class)->create([
-            'name' => 'First Category',
-        ]);
-
-        factory(Book::class)->create([
-            'name' => 'First Book',
-            'category_id' => 1
-        ]);
-
-        $response = $this->json('GET', 'api/book/1', [])
-            ->assertStatus(200)
-            ->assertJson([
-                'success' => true
-            ])
-            ->assertJsonStructure([
-                'success',
-                'data',
-                'message'
-            ]);
-    }
-
-    public function testBookAreShowedFailedNotFound()
-    {
-        $response = $this->json('GET', 'api/book/1', [])
-            ->assertStatus(404)
-            ->assertJson([
-                'success' => false
-            ])
-            ->assertJsonStructure([
-                'success',
                 'message'
             ]);
     }
